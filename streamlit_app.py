@@ -6,14 +6,23 @@ st.write("""
 
 
 # 入力UI
-current_vi = st.number_input('現在のVi', min_value=10, max_value=10000)
-current_vi_limit = st.number_input('現在のVi上限', min_value=500, max_value=10000)
+col1, col2 = st.columns(2)
+with col1:
+    current_vi = st.number_input('現在のVi', min_value=10, max_value=10000)
+with col2:
+    current_vi_limit = st.number_input('現在のVi上限', min_value=500, max_value=10000)
 
-vi_up = st.number_input('Vi UP', min_value=0, max_value=100000)
-sp_up = st.number_input('SP UP', min_value=0, max_value=100000)
+col3, col4 = st.columns(2)
+with col3:
+    vi_up = st.number_input('Vi UP', min_value=0, max_value=100000)
+with col4:
+    sp_up = st.number_input('SP UP', min_value=0, max_value=100000)
 
-current_vi_cnt = st.number_input('現在のVi回数', min_value=0, max_value=200)
-current_vi_limit_cnt = st.number_input('現在のVi上限回数', min_value=0, max_value=200)
+col5, col6 = st.columns(2)
+with col5:
+    current_vi_cnt = st.number_input('現在のVi回数', min_value=0, max_value=200)
+with col6:
+    current_vi_limit_cnt = st.number_input('現在のVi上限回数', min_value=0, max_value=200)
 
 
 vi_params = [10, 5, 5, 10, 10, 10, 0, 0, 0, 0]
@@ -68,7 +77,7 @@ def main():
 
     vi_cnt = max_limit_cnt
     vi_limit_cnt = max_limit_cnt
-    sp_status = -1
+    sp_status = sp_up
     loop = 0
     while vi_cnt > current_vi_cnt and loop < 10000:
         loop += 1
@@ -97,7 +106,7 @@ def main():
                     # 一定limit減らしても増やせる場合
                     s = (now_vi_limit - now_vi)//10
                     if sum(vi_params[:rank]) < vi_status + sum(vi_params[:rank])*s and \
-                        sum(sp_params[:rank]) < sp_status + sum(sp_params[:rank])*s:
+                        sum(sp_params[:rank]) < sp_status + sum(sp_params[:rank])*s and vi_limit_cnt>0:
                         vi_limit_cnt -= 1
                         _debug(">>> limit dec2")
                     else:
@@ -127,11 +136,27 @@ vi_limit = current_vi_limit + (vi_limit_cnt - current_vi_limit_cnt)*10
 st.write(f"最適値は vi回数:{vi_cnt}, vi上限回数:{vi_limit_cnt} : vi:{vi}, vi上限:{vi_limit}")
 st.write(f"SPの残りは {sp} です")
 
+download_data = f"""現在の属性値,現在の属性値上限,属性Upポイント,SP Upポイント,現在の属性回数,現在のSP回数,最適属性回数,最適上限回数,属性値,上限値,sp残り
+{current_vi},{current_vi_limit},{vi_up},{sp_up},{current_vi_cnt},{current_vi_limit_cnt},{vi_cnt},{vi_limit_cnt},{vi},{vi_limit},{sp}
+"""
+st.download_button(
+    label="Download results",
+    data=download_data,
+    file_name="step_results.csv",
+    mime="text/csv"
+        )
+
 st.write("----")
 st.write("""
 このツールは非公式ツールです。
 
 仕様変更によりパラメータが変わった際など、動作保証はできません。自己責任でお使いください。
 
-質問などございましたら、mstdn.jp/showyou あたりまでどうぞ。
+質問などございましたら、https://imastodon.net/@showyou あたりまでどうぞ。
+""")
+st.write("-----")
+st.write("""
+現在の仕様
+
+現在のパラメータ等が小さい時に、誤った結果を返すことがある
 """)
